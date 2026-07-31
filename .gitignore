@@ -1,32 +1,10 @@
-# Virtual environment
+# Python
 .venv/
-
-# Python cache
 __pycache__/
 *.py[cod]
-*.pyo
 
 # macOS
 .DS_Store
 
-# VS Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/launch.json
-!.vscode/tasks.json
-
-# Logs
-*.log
-
 # Environment
 .env
-
-# Test
-.pytest_cache/
-
-# Coverage
-.coverage
-htmlcov/
-
-# Local files
-*.sqlite3
