@@ -1,0 +1,9 @@
+                        Agent
+                          │
+      ┌───────────────────┼────────────────────┐
+      ▼                   ▼                    ▼
+  System Prompt        Memory              LLM Client
+      │                   │                    │
+      ▼                   ▼                    ▼
+ Configuration     Conversation         Ollama/OpenAI
+                        History

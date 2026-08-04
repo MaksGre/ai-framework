@@ -1,0 +1,13 @@
+                           AI Framework
+                                  │
+        ┌───────────────┬─────────┼─────────┐
+        ▼               ▼         ▼         ▼
+ Engineering       Vacancy      EVE      Industrial
+    Mentor         Assistant   Assistant  Automation
+
+Shared Framework Components
+        Agent
+        Memory
+        Tools
+        Prompt
+        LLM

@@ -1,0 +1,15 @@
+User Message
+      │
+      ▼
+Conversation Memory
+      │
+      ├──────────────┐
+      ▼              ▼
+Recent Messages   Summary
+      │              │
+      └──────┬───────┘
+             ▼
+      Prompt Builder
+             │
+             ▼
+         LLM Client

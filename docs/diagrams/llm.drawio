@@ -1,0 +1,10 @@
+                  Engineering Mentor
+                           │
+                    LLMClient
+                           │
+          ┌────────────────┼────────────────┐
+          ▼                ▼                ▼
+     OllamaClient     OpenAIClient     ClaudeClient
+          │
+          ▼
+      Qwen3 8B
