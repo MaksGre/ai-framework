@@ -1,4 +1,5 @@
 # AI Framework
+# AI Framework
 
 > Building a lightweight AI framework for specialized AI assistants.
 
@@ -46,6 +47,7 @@ Instead of relying on high-level frameworks, this project focuses on building th
 
 - [ ] CLI chat interface
 - [ ] Agent configuration
+- [ ] Prompt Builder
 - [ ] System prompt
 - [ ] Engineering Mentor MVP
 

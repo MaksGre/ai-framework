@@ -18,14 +18,23 @@ class OllamaClient(LLMClient):
         )
 
     def generate(self, request: LLMRequest) -> LLMResponse:
-        response = self._client.post(
-            "/api/generate",
-            json={
-                "model": self._model,
-                "prompt": request.prompt,
-                "stream": False,
-            },
+        print("Sending request to Ollama...")
+
+        payload = {
+            "model": self._model,
+            "prompt": request.prompt,
+            "stream": False,
+        }
+
+        print(payload)
+
+        response = httpx.post(
+            "http://localhost:11434/api/generate",
+            json=payload,
+            timeout=60,
         )
+
+        print("Response received from Ollama.")
 
         response.raise_for_status()
 
