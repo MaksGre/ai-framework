@@ -16,7 +16,7 @@ class Agent:
         self._llm = llm
         self._builder = builder
 
-    def run(self, prompt: str) -> str:
+    def ask(self, prompt: str) -> str:
         context = self._builder.build(prompt)
         
         request = LLMRequest(
@@ -26,3 +26,6 @@ class Agent:
         response = self._llm.generate(request)
         
         return response.text
+        
+    def analyze_file(self, path: str) -> str:
+        return self.ask(f"@{path}")

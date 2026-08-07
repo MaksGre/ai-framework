@@ -1,4 +1,5 @@
 import httpx
+import time
 
 from .client import LLMClient
 from .models import LLMRequest, LLMResponse
@@ -27,12 +28,18 @@ class OllamaClient(LLMClient):
         }
 
         print(payload)
+        
+        start = time.perf_counter()
 
         response = httpx.post(
             "http://localhost:11434/api/generate",
             json=payload,
-            timeout=120,
+            timeout=300,
         )
+
+        elapsed = time.perf_counter() - start
+        
+        print(f"Request completed in {elapsed:.2f} seconds")
 
         print("Response received from Ollama.")
 
