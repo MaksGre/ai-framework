@@ -1,14 +1,17 @@
-import httpx
+from ai.agents.base import Agent
+from ai.llm.ollama import OllamaClient
+from ai.prompts.engineering_mentor import ENGINEERING_MENTOR_PROMPT
 
-response = httpx.post(
-    "http://localhost:11434/api/generate",
-    json={
-        "model": "qwen3:8b",
-        "prompt": "Привет",
-        "stream": False,
-    },
-    timeout=60,
+llm = OllamaClient(
+    model="qwen3:8b",
 )
 
-print(response.status_code)
-print(response.json()["response"])
+mentor = Agent(
+    name="Engineering Mentor",
+    system_prompt=ENGINEERING_MENTOR_PROMPT,
+    llm=llm,
+)
+
+response = mentor.run("Привет!")
+
+print(response)

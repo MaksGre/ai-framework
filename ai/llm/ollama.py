@@ -31,7 +31,7 @@ class OllamaClient(LLMClient):
         response = httpx.post(
             "http://localhost:11434/api/generate",
             json=payload,
-            timeout=60,
+            timeout=120,
         )
 
         print("Response received from Ollama.")
@@ -42,4 +42,9 @@ class OllamaClient(LLMClient):
 
         return LLMResponse(
             text=data["response"],
+            thinking=data.get("thinking"),
+            model=data.get("model"),
+            prompt_tokens=data.get("prompt_eval_count"),
+            completion_tokens=data.get("eval_count"),
+            total_duration=data.get("total_duration"),
         )
