@@ -34,6 +34,9 @@ mentor = Agent(
     builder=builder,
 )
 
-response = mentor.analyze_files([])
+response = mentor.analyze_files([
+    "ai/context/builder.py",
+#    "ai/files/loader.py",
+])
 
 print(response)

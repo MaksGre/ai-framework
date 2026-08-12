@@ -1,6 +1,7 @@
 from ai.files.loader import FileLoader
 from ai.prompts.builder import PromptBuilder
 from ai.files.finder import ProjectFinder
+from ai.models.file_content import FileContent
 
 class ContextBuilder:
     def __init__(
@@ -17,20 +18,7 @@ class ContextBuilder:
         if not prompt.startswith("@"):
             return prompt
             
-        files = self._finder.find(
-                name = prompt[1:],
-                root = "."
-        )
-            
-        if not files:
-            raise FileNotFoundError(prompt[1:])
-            
-        if len(files) > 1:
-            raise ValueError(
-                f"Found multiple files: {[file.path for file in files]}"
-             )
-            
-        file = self._loader.load(files[0].path)
+        file = self._load_file(prompt[1:])
         
         return self._prompt_builder.build_file_analysis_prompt(file)
         
@@ -41,24 +29,27 @@ class ContextBuilder:
         if not paths:
             raise ValueError("No files provided")
 
-        files = []        
+        files = []
         
         for path in paths:
-            matches = self._finder.find(
-                name = path,
-                root = "."
-            )
-        
-            if not matches:
-                raise FileNotFoundError(path)
-                
-            if len(matches) > 1:
-                raise ValueError(
-                    f"Found multiple files: {[file.path for file in matches]}"
-                )
-                
             files.append(
-                self._loader.load(matches[0].path)
+                self._load_file(path)
             )
 
         return self._prompt_builder.build_files_analysis_prompt(files)
+
+    def _load_file(self, name: str) -> FileContent:
+        matches = self._finder.find(
+            name = name,
+            root = "."
+        )
+        
+        if not matches:
+            raise FileNotFoundError(name)
+            
+        if len(matches) > 1:
+            raise ValueError(
+                f"Found multiple files: {[file.path for file in matches]}"
+            )
+
+        return self._loader.load(matches[0].path)
