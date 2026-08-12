@@ -29,3 +29,17 @@ class Agent:
         
     def analyze_file(self, path: str) -> str:
         return self.ask(f"@{path}")
+
+    def analyze_files(
+        self,
+        paths: list[str]
+    ) -> str:
+        prompt = self._builder.build_files(paths)
+        
+        request = LLMRequest(
+            prompt = prompt
+        )
+        
+        response = self._llm.generate(request)
+        
+        return response.text

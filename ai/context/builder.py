@@ -27,9 +27,38 @@ class ContextBuilder:
             
         if len(files) > 1:
             raise ValueError(
-                f"Found multiple files: {[file.path for file on files]}"
+                f"Found multiple files: {[file.path for file in files]}"
              )
             
         file = self._loader.load(files[0].path)
         
-        return self._prompt_builder.build_file_analysis(file)
+        return self._prompt_builder.build_file_analysis_prompt(file)
+        
+    def build_files(
+        self,
+        paths: list[str],
+    ) -> str:
+        if not paths:
+            raise ValueError("No files provided")
+
+        files = []        
+        
+        for path in paths:
+            matches = self._finder.find(
+                name = path,
+                root = "."
+            )
+        
+            if not matches:
+                raise FileNotFoundError(path)
+                
+            if len(matches) > 1:
+                raise ValueError(
+                    f"Found multiple files: {[file.path for file in matches]}"
+                )
+                
+            files.append(
+                self._loader.load(matches[0].path)
+            )
+
+        return self._prompt_builder.build_files_analysis_prompt(files)

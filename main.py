@@ -34,6 +34,6 @@ mentor = Agent(
     builder=builder,
 )
 
-response = mentor.analyze_file("builder.py")
+response = mentor.analyze_files([])
 
 print(response)
