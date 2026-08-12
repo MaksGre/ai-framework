@@ -4,6 +4,8 @@ from ai.prompts.builder import PromptBuilder
 from ai.prompts.engineering_mentor import ENGINEERING_MENTOR_PROMPT
 from ai.context.builder import ContextBuilder
 from ai.files.loader import FileLoader
+from ai.files.scanner import ProjectScanner
+from ai.files.finder import ProjectFinder
 
 llm = OllamaClient(
     model="qwen3:8b",
@@ -13,9 +15,16 @@ loader = FileLoader()
 
 prompt_builder = PromptBuilder()
 
+scanner = ProjectScanner()
+
+finder = ProjectFinder(
+    scanner = scanner
+)
+
 builder = ContextBuilder(
     loader = loader,
-    prompt_builder = prompt_builder
+    prompt_builder = prompt_builder,
+    finder = finder
 )
 
 mentor = Agent(
@@ -25,6 +34,6 @@ mentor = Agent(
     builder=builder,
 )
 
-response = mentor.analyze_file("README.md")
+response = mentor.analyze_file("builder.py")
 
 print(response)

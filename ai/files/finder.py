@@ -1,4 +1,5 @@
 from ai.files.scanner import ProjectScanner
+from ai.models.file_info import FileInfo
 
 
 class ProjectFinder:
@@ -12,5 +13,11 @@ class ProjectFinder:
         self,
         name: str,
         root: str,
-    ) -> List[FileInfo]:
-        raise NotEmplementedError
+    ) -> list[FileInfo]:
+        files = self._scanner.scan(root)
+        
+        return [
+            file
+            for file in files
+            if file.path.endswith(name)
+        ]
