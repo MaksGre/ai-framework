@@ -14,17 +14,25 @@ class ContextBuilder:
         self._prompt_builder = prompt_builder
         self._finder = finder
 
-    def build(self, prompt: str) -> str:
+    def build(
+        self,
+        prompt: str,
+        task: str
+    ) -> str:
         if not prompt.startswith("@"):
             return prompt
             
         file = self._load_file(prompt[1:])
         
-        return self._prompt_builder.build_file_analysis_prompt(file)
+        return self._prompt_builder.build_file_analysis_prompt(
+            file,
+            task
+        )
         
     def build_files(
         self,
         paths: list[str],
+        task: str
     ) -> str:
         if not paths:
             raise ValueError("No files provided")
@@ -36,7 +44,10 @@ class ContextBuilder:
                 self._load_file(path)
             )
 
-        return self._prompt_builder.build_files_analysis_prompt(files)
+        return self._prompt_builder.build_files_analysis_prompt(
+            files,
+            task
+        )
 
     def _load_file(self, name: str) -> FileContent:
         matches = self._finder.find(

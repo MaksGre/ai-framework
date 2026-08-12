@@ -1,11 +1,16 @@
 from ai.models.file_content import FileContent
 
+
 class PromptBuilder:
     def build_file_analysis_prompt(
         self,
-        file: FileContent
+        file: FileContent,
+        task: str
     ) -> str:
-        return f"""
+        return f"""Задача:
+
+{task}
+        
 Проанализируй следующий файл.
 
 Файл: {file.path}
@@ -14,17 +19,22 @@ class PromptBuilder:
 Содержимое:
 
 {file.content}
-""".strip()
+"""
 
     def build_files_analysis_prompt(
         self,
         files: list[FileContent],
+        task: str
      ) -> str:
-        prompt = "Проанализируй следующие файлы. \n\n"
-        
+        prompt = f"""Задача:
+
+{task}
+
+Проанализируй следующие файлы.
+
+"""
         for file in files:
-            prompt += f"""
-Файл: {file.path}
+            prompt += f"""Файл {file.path}
 Расширение: {file.extension}
 
 Содержимое:

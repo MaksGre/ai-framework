@@ -34,9 +34,9 @@ mentor = Agent(
     builder=builder,
 )
 
-response = mentor.analyze_files([
+response = mentor.analyze_file(
     "ai/context/builder.py",
-#    "ai/files/loader.py",
-])
+    task="Объясни, зачем нужен ContextBuilder",
+)
 
 print(response)
