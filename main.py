@@ -7,6 +7,7 @@ from ai.files.loader import FileLoader
 from ai.files.scanner import ProjectScanner
 from ai.files.finder import ProjectFinder
 from ai.memory.base import Memory
+from ai.tools.calculator import CalculatorTool
 
 llm = OllamaClient(
     model="qwen3:8b",
@@ -30,18 +31,30 @@ builder = ContextBuilder(
 
 memory = Memory()
 
+calculator = CalculatorTool()
+
 mentor = Agent(
     name = "Engineering Mentor",
     system_prompt = ENGINEERING_MENTOR_PROMPT,
     llm = llm,
     builder = builder,
-    memory = memory
+    memory = memory,
+    tools = [calculator]
 )
+#
+##response = mentor.analyze_file(
+##    "ai/context/builder.py",
+##    task = "Объясни, зачем нужен ContextBuilder",
+##)
+#
+#mentor.ask("Меня зовут Максим")
+#mentor.ask("Как меня зовут?")
 
-#response = mentor.analyze_file(
-#    "ai/context/builder.py",
-#    task = "Объясни, зачем нужен ContextBuilder",
-#)
-
-mentor.ask("Меня зовут Максим")
-mentor.ask("Как меня зовут?")
+print(
+    mentor.execute_tool(
+        name = "calculator",
+        arguments = {
+            "expression": "125 * 37"
+        }
+    )
+)
