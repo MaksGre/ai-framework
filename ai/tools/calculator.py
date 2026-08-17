@@ -18,16 +18,19 @@ class CalculatorTool(Tool):
     
     def schema(self) -> dict:
         return {
-            "name": self.name,
-            "description": self.description,
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "expression": {
-                        "type": "string",
-                        "description": "Mathematical expression to calculate.",
-                    }
+            "type": "function",
+            "function": {
+                "name": self.name,
+                "description": self.description,
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "expression": {
+                            "type": "string",
+                            "description": "Mathematical expression to calculate.",
+                        }
+                    },
+                    "required": ["expression"],
                 },
-                "required": ["expression"],
             },
         }

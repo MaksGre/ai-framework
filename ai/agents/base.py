@@ -58,27 +58,32 @@ class Agent:
 
                 return response.text
 
+            assistant_tool_calls = []
+
+            for tool_call in response.tool_calls:
+                assistant_tool_calls.append(
+                    {
+                        "id": tool_call.id,
+                        "type": "function",
+                        "function": {
+                            "name": tool_call.name,
+                            "arguments": tool_call.arguments,
+                        },
+                    }
+                )
+
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": response.text,
+                    "tool_calls": assistant_tool_calls,
+                }
+            )
+
             for tool_call in response.tool_calls:
                 result = self.execute_tool(
                     name=tool_call.name,
                     arguments=tool_call.arguments,
-                )
-
-                messages.append(
-                    {
-                        "role": "assistant",
-                        "content": response.text,
-                        "tool_calls": [
-                            {
-                                "id": tool_call.id,
-                                "type": "function",
-                                "function": {
-                                    "name": tool_call.name,
-                                    "arguments": tool_call.arguments,
-                                },
-                            }
-                        ],
-                    }
                 )
 
                 messages.append(
