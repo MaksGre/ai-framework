@@ -2,7 +2,7 @@ import httpx
 import time
 
 from .client import LLMClient
-from .models import LLMRequest, LLMResponse
+from .models import LLMRequest, LLMResponse, ToolCall
 
 
 class OllamaClient(LLMClient):
@@ -23,16 +23,19 @@ class OllamaClient(LLMClient):
 
         payload = {
             "model": self._model,
-            "prompt": request.prompt,
+            "messages": request.messages,
             "stream": False,
         }
+        
+        if request.tools:
+            payload["tools"] = request.tools
 
         print(payload)
         
         start = time.perf_counter()
 
         response = httpx.post(
-            "http://localhost:11434/api/generate",
+            "http://localhost:11434/api/chat",
             json=payload,
             timeout=300,
         )
@@ -46,12 +49,23 @@ class OllamaClient(LLMClient):
         response.raise_for_status()
 
         data = response.json()
+        
+        print("OLLAMA RESPONSE:")
+        print(data)
 
         return LLMResponse(
-            text=data["response"],
-            thinking=data.get("thinking"),
+            text=data["message"].get("content", ""),
+            total_duration=data.get("total_duration"),
+            thinking=data["message"].get("thinking"),
             model=data.get("model"),
             prompt_tokens=data.get("prompt_eval_count"),
             completion_tokens=data.get("eval_count"),
-            total_duration=data.get("total_duration"),
+            tool_calls = [
+                ToolCall(
+                    id = tool_call["id"],
+                    name = tool_call["function"]["name"],
+                    arguments = tool_call["function"]["arguments"],
+                 )
+                 for tool_call in data["message"].get("tool_calls", [])
+            ]
         )

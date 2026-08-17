@@ -26,66 +26,118 @@ class Agent:
 
     def ask(self, prompt: str) -> str:
         context = self._builder.build(prompt)
-        
+
         self._memory.add(
-            role = "user",
-            content = context
+            role="user",
+            content=context,
         )
-        
+
         history = self._memory.get()
-        
-        conversation = "\n\n".join(
-            f"{message.role}: {message.content}"
+
+        messages = [
+            {
+                "role": message.role,
+                "content": message.content,
+            }
             for message in history
-        )
-        
+        ]
+
         request = LLMRequest(
-            prompt = conversation,
+            messages=messages,
+            tools=self._tool_registry.schemas(),
         )
-        
-        response = self._llm.generate(request)
-        
-        self._memory.add(
-            role = "assistant",
-            content = response.text
-         )
-        
-        return response.text
-        
+
+        while True:
+            response = self._llm.generate(request)
+
+            if not response.tool_calls:
+                self._memory.add(
+                    role="assistant",
+                    content=response.text,
+                )
+
+                return response.text
+
+            for tool_call in response.tool_calls:
+                result = self.execute_tool(
+                    name=tool_call.name,
+                    arguments=tool_call.arguments,
+                )
+
+                messages.append(
+                    {
+                        "role": "assistant",
+                        "content": response.text,
+                        "tool_calls": [
+                            {
+                                "id": tool_call.id,
+                                "type": "function",
+                                "function": {
+                                    "name": tool_call.name,
+                                    "arguments": tool_call.arguments,
+                                },
+                            }
+                        ],
+                    }
+                )
+
+                messages.append(
+                    {
+                        "role": "tool",
+                        "content": result,
+                        "tool_call_id": tool_call.id,
+                    }
+                )
+
+            request = LLMRequest(
+                messages=messages,
+                tools=self._tool_registry.schemas(),
+            )
+
     def analyze_file(
         self,
         path: str,
-        task: str
+        task: str,
     ) -> str:
         prompt = self._builder.build(
-            prompt = f"@{path}",
-            task = task
+            prompt=f"@{path}",
+            task=task,
         )
-        
+
         request = LLMRequest(
-            prompt = prompt
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
         )
-        
+
         response = self._llm.generate(request)
-        
+
         return response.text
 
     def analyze_files(
         self,
         paths: list[str],
-        task: str
+        task: str,
     ) -> str:
         prompt = self._builder.build_files(
-            paths = paths,
-            task = task
+            paths=paths,
+            task=task,
         )
-        
+
         request = LLMRequest(
-            prompt = prompt
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
         )
-        
+
         response = self._llm.generate(request)
-        
+
         return response.text
 
     def execute_tool(
@@ -94,5 +146,5 @@ class Agent:
         arguments: dict,
     ) -> str:
         tool = self._tool_registry.get(name)
-        
+
         return tool.execute(**arguments)

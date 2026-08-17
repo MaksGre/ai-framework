@@ -15,3 +15,9 @@ class Tool(ABC):
     @abstractmethod
     def execute(self, **kwargs) -> str:
         pass
+
+    def schema(self) -> dict:
+        return {
+            "name": self.name,
+            "description": self.description,
+        }

@@ -12,3 +12,9 @@ class ToolRegistry:
                 return tool
                 
         raise ValueError(f"Tool not found: {name}")
+
+    def schemas(self) -> list[dict]:
+        return [
+            tool.schema()
+            for tool in self._tools
+        ]

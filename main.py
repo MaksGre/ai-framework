@@ -9,6 +9,7 @@ from ai.files.finder import ProjectFinder
 from ai.memory.base import Memory
 from ai.tools.calculator import CalculatorTool
 
+
 llm = OllamaClient(
     model="qwen3:8b",
 )
@@ -20,13 +21,13 @@ prompt_builder = PromptBuilder()
 scanner = ProjectScanner()
 
 finder = ProjectFinder(
-    scanner = scanner
+    scanner=scanner,
 )
 
 builder = ContextBuilder(
-    loader = loader,
-    prompt_builder = prompt_builder,
-    finder = finder
+    loader=loader,
+    prompt_builder=prompt_builder,
+    finder=finder,
 )
 
 memory = Memory()
@@ -34,27 +35,16 @@ memory = Memory()
 calculator = CalculatorTool()
 
 mentor = Agent(
-    name = "Engineering Mentor",
-    system_prompt = ENGINEERING_MENTOR_PROMPT,
-    llm = llm,
-    builder = builder,
-    memory = memory,
-    tools = [calculator]
+    name="Engineering Mentor",
+    system_prompt=ENGINEERING_MENTOR_PROMPT,
+    llm=llm,
+    builder=builder,
+    memory=memory,
+    tools=[calculator],
 )
-#
-##response = mentor.analyze_file(
-##    "ai/context/builder.py",
-##    task = "Объясни, зачем нужен ContextBuilder",
-##)
-#
-#mentor.ask("Меня зовут Максим")
-#mentor.ask("Как меня зовут?")
 
-print(
-    mentor.execute_tool(
-        name = "calculator",
-        arguments = {
-            "expression": "125 * 37"
-        }
-    )
+response = mentor.ask(
+    "Сколько будет 125 * 37?"
 )
+
+print(response)
