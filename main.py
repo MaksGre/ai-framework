@@ -6,6 +6,7 @@ from ai.context.builder import ContextBuilder
 from ai.files.loader import FileLoader
 from ai.files.scanner import ProjectScanner
 from ai.files.finder import ProjectFinder
+from ai.memory.base import Memory
 
 llm = OllamaClient(
     model="qwen3:8b",
@@ -27,16 +28,20 @@ builder = ContextBuilder(
     finder = finder
 )
 
+memory = Memory()
+
 mentor = Agent(
-    name="Engineering Mentor",
-    system_prompt=ENGINEERING_MENTOR_PROMPT,
-    llm=llm,
-    builder=builder,
+    name = "Engineering Mentor",
+    system_prompt = ENGINEERING_MENTOR_PROMPT,
+    llm = llm,
+    builder = builder,
+    memory = memory
 )
 
-response = mentor.analyze_file(
-    "ai/context/builder.py",
-    task="Объясни, зачем нужен ContextBuilder",
-)
+#response = mentor.analyze_file(
+#    "ai/context/builder.py",
+#    task = "Объясни, зачем нужен ContextBuilder",
+#)
 
-print(response)
+mentor.ask("Меня зовут Максим")
+mentor.ask("Как меня зовут?")

@@ -17,7 +17,7 @@ class ContextBuilder:
     def build(
         self,
         prompt: str,
-        task: str
+        task: str = ""
     ) -> str:
         if not prompt.startswith("@"):
             return prompt
