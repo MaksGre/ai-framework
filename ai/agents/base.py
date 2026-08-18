@@ -98,21 +98,28 @@ class Agent:
         self,
         history: list[Message],
     ) -> list[dict]:
-        return [
+        messages = [
             {
                 "role": "system",
                 "content": self._system_prompt,
-            },
-            *[
-                {
-                    "role": message.role,
-                    "content": message.content,
-                    "tool_calls": message.tool_calls,
-                    "tool_call_id": message.tool_call_id,
-                }
-                for message in history
-            ],
+            }
         ]
+
+        for message in history:
+            data = {
+                "role": message.role,
+                "content": message.content,
+            }
+
+            if message.tool_calls is not None:
+                data["tool_calls"] = message.tool_calls
+
+            if message.tool_call_id is not None:
+                data["tool_call_id"] = message.tool_call_id
+
+            messages.append(data)
+
+        return messages
 
     def _run_agent_loop(
         self,
