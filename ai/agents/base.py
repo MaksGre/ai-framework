@@ -34,16 +34,7 @@ class Agent:
 
         history = self._memory.get()
 
-        messages = [
-            {
-                "role": "system",
-                "content": self._system_prompt,
-            },
-            *[
-                message.model_dump(exclude_none = True)
-                for message in history
-            ],
-        ]
+        messages = self._build_messages()
 
         request = LLMRequest(
             messages = messages,
@@ -156,3 +147,17 @@ class Agent:
         tool = self._tool_registry.get(name)
 
         return tool.execute(**arguments)
+
+    def _build_messages(self) -> list[dict]:
+        history = self._memory.get()
+
+        return [
+            {
+                "role": "system",
+                "content": self._system_prompt,
+            },
+            *[
+                message.model_dump(exclude_none=True)
+                for message in history
+            ],
+        ]
