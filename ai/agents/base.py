@@ -40,10 +40,7 @@ class Agent:
                 "content": self._system_prompt,
             },
             *[
-                {
-                    "role": message.role,
-                    "content": message.content,
-                }
+                message.model_dump(exclude_none = True)
                 for message in history
             ],
         ]
