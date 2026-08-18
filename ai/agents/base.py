@@ -28,23 +28,29 @@ class Agent:
         context = self._builder.build(prompt)
 
         self._memory.add(
-            role="user",
-            content=context,
+            role = "user",
+            content = context,
         )
 
         history = self._memory.get()
 
         messages = [
             {
-                "role": message.role,
-                "content": message.content,
-            }
-            for message in history
+                "role": "system",
+                "content": self._system_prompt,
+            },
+            *[
+                {
+                    "role": message.role,
+                    "content": message.content,
+                }
+                for message in history
+            ],
         ]
 
         request = LLMRequest(
-            messages=messages,
-            tools=self._tool_registry.schemas(),
+            messages = messages,
+            tools = self._tool_registry.schemas(),
         )
 
         while True:
@@ -52,8 +58,8 @@ class Agent:
 
             if not response.tool_calls:
                 self._memory.add(
-                    role="assistant",
-                    content=response.text,
+                    role = "assistant",
+                    content = response.text,
                 )
 
                 return response.text
@@ -82,8 +88,8 @@ class Agent:
 
             for tool_call in response.tool_calls:
                 result = self.execute_tool(
-                    name=tool_call.name,
-                    arguments=tool_call.arguments,
+                    name = tool_call.name,
+                    arguments = tool_call.arguments,
                 )
 
                 messages.append(
@@ -95,7 +101,7 @@ class Agent:
                 )
 
             request = LLMRequest(
-                messages=messages,
+                messages = messages,
                 tools=self._tool_registry.schemas(),
             )
 
@@ -105,12 +111,12 @@ class Agent:
         task: str,
     ) -> str:
         prompt = self._builder.build(
-            prompt=f"@{path}",
-            task=task,
+            prompt = f"@{path}",
+            task = task,
         )
 
         request = LLMRequest(
-            messages=[
+            messages = [
                 {
                     "role": "user",
                     "content": prompt,

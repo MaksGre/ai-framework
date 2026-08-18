@@ -19,21 +19,18 @@ class OllamaClient(LLMClient):
         )
 
     def generate(self, request: LLMRequest) -> LLMResponse:
-        print("Sending request to Ollama...")
-
+        start = time.perf_counter()
+        
         payload = {
             "model": self._model,
             "messages": request.messages,
             "stream": False,
+            "think": False,
         }
         
         if request.tools:
             payload["tools"] = request.tools
-
-        print(payload)
         
-        start = time.perf_counter()
-
         response = httpx.post(
             "http://localhost:11434/api/chat",
             json=payload,
@@ -43,23 +40,23 @@ class OllamaClient(LLMClient):
         elapsed = time.perf_counter() - start
         
         print(f"Request completed in {elapsed:.2f} seconds")
-
-        print("Response received from Ollama.")
-
+        
         response.raise_for_status()
 
         data = response.json()
         
-        print("OLLAMA RESPONSE:")
-        print(data)
+        prompt_tokens = data.get("prompt_eval_count")
+        completion_tokens = data.get("eval_count")
 
+        print(f"Tokens: {prompt_tokens} prompt + {completion_tokens} completion = {prompt_tokens + completion_tokens} total")
+        
         return LLMResponse(
-            text=data["message"].get("content", ""),
-            total_duration=data.get("total_duration"),
-            thinking=data["message"].get("thinking"),
-            model=data.get("model"),
-            prompt_tokens=data.get("prompt_eval_count"),
-            completion_tokens=data.get("eval_count"),
+            text = data["message"].get("content", ""),
+            total_duration = data.get("total_duration"),
+            thinking = data["message"].get("thinking"),
+            model = data.get("model"),
+            prompt_tokens = data.get("prompt_eval_count"),
+            completion_tokens = data.get("eval_count"),
             tool_calls = [
                 ToolCall(
                     id = tool_call["id"],

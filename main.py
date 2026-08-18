@@ -35,16 +35,28 @@ memory = Memory()
 calculator = CalculatorTool()
 
 mentor = Agent(
-    name="Engineering Mentor",
-    system_prompt=ENGINEERING_MENTOR_PROMPT,
-    llm=llm,
-    builder=builder,
-    memory=memory,
-    tools=[calculator],
+    name = "Engineering Mentor",
+    system_prompt = ENGINEERING_MENTOR_PROMPT,
+    llm = llm,
+    builder = builder,
+    memory = memory,
+    tools = [calculator],
 )
 
-response = mentor.ask(
-    "Сколько будет 125 * 37?"
-)
+while True:
+    try:
+        prompt = input("> ")
+        
+        if not prompt.strip():
+            continue
 
-print(response)
+        if prompt.lower() in ("exit", "quit"):
+            break
+
+        response = mentor.ask(prompt)
+        
+        print(response)
+        
+    except KeyboardInterrupt:
+        print("\nВыход.")
+        break
