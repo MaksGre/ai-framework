@@ -4,6 +4,7 @@ from ai.memory.base import Memory
 from ai.context.builder import ContextBuilder
 from ai.tools.base import Tool
 from ai.tools.registry import ToolRegistry
+from ai.memory.message import Message
 
 
 class Agent:
@@ -28,70 +29,15 @@ class Agent:
         context = self._builder.build(prompt)
 
         self._memory.add(
-            role = "user",
-            content = context,
+            role="user",
+            content=context,
         )
 
-        history = self._memory.get()
-
-        messages = self._build_messages()
-
-        request = LLMRequest(
-            messages = messages,
-            tools = self._tool_registry.schemas(),
+        messages = self._build_messages(
+            self._memory.get()
         )
 
-        while True:
-            response = self._llm.generate(request)
-
-            if not response.tool_calls:
-                self._memory.add(
-                    role = "assistant",
-                    content = response.text,
-                )
-
-                return response.text
-
-            assistant_tool_calls = []
-
-            for tool_call in response.tool_calls:
-                assistant_tool_calls.append(
-                    {
-                        "id": tool_call.id,
-                        "type": "function",
-                        "function": {
-                            "name": tool_call.name,
-                            "arguments": tool_call.arguments,
-                        },
-                    }
-                )
-
-            messages.append(
-                {
-                    "role": "assistant",
-                    "content": response.text,
-                    "tool_calls": assistant_tool_calls,
-                }
-            )
-
-            for tool_call in response.tool_calls:
-                result = self.execute_tool(
-                    name = tool_call.name,
-                    arguments = tool_call.arguments,
-                )
-
-                messages.append(
-                    {
-                        "role": "tool",
-                        "content": result,
-                        "tool_call_id": tool_call.id,
-                    }
-                )
-
-            request = LLMRequest(
-                messages = messages,
-                tools=self._tool_registry.schemas(),
-            )
+        return self._run_agent_loop(messages)
 
     def analyze_file(
         self,
@@ -148,16 +94,95 @@ class Agent:
 
         return tool.execute(**arguments)
 
-    def _build_messages(self) -> list[dict]:
-        history = self._memory.get()
-
+    def _build_messages(
+        self,
+        history: list[Message],
+    ) -> list[dict]:
         return [
             {
                 "role": "system",
                 "content": self._system_prompt,
             },
             *[
-                message.model_dump(exclude_none=True)
+                {
+                    "role": message.role,
+                    "content": message.content,
+                    "tool_calls": message.tool_calls,
+                    "tool_call_id": message.tool_call_id,
+                }
                 for message in history
             ],
         ]
+
+    def _run_agent_loop(
+        self,
+        messages: list[dict],
+    ) -> str:
+        request = LLMRequest(
+            messages=messages,
+            tools=self._tool_registry.schemas(),
+        )
+
+        while True:
+            response = self._llm.generate(request)
+
+            if not response.tool_calls:
+                self._memory.add(
+                    role="assistant",
+                    content=response.text,
+                )
+
+                return response.text
+
+            assistant_tool_calls = []
+
+            for tool_call in response.tool_calls:
+                assistant_tool_calls.append(
+                    {
+                        "id": tool_call.id,
+                        "type": "function",
+                        "function": {
+                            "name": tool_call.name,
+                            "arguments": tool_call.arguments,
+                        },
+                    }
+                )
+
+            self._memory.add(
+                role="assistant",
+                content=response.text,
+                tool_calls=assistant_tool_calls,
+            )
+
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": response.text,
+                    "tool_calls": assistant_tool_calls,
+                }
+            )
+
+            for tool_call in response.tool_calls:
+                result = self.execute_tool(
+                    name=tool_call.name,
+                    arguments=tool_call.arguments,
+                )
+
+                self._memory.add(
+                    role="tool",
+                    content=result,
+                    tool_call_id=tool_call.id,
+                )
+
+                messages.append(
+                    {
+                        "role": "tool",
+                        "content": result,
+                        "tool_call_id": tool_call.id,
+                    }
+                )
+
+            request = LLMRequest(
+                messages=messages,
+                tools=self._tool_registry.schemas(),
+            )

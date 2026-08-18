@@ -27,3 +27,6 @@ class Memory:
     
     def get(self) -> list[Message]:
         return self._messages.copy()
+
+    def clear(self) -> None:
+        self._messages.clear()
