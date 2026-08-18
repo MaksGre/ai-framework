@@ -105,19 +105,10 @@ class Agent:
             }
         ]
 
-        for message in history:
-            data = {
-                "role": message.role,
-                "content": message.content,
-            }
-
-            if message.tool_calls is not None:
-                data["tool_calls"] = message.tool_calls
-
-            if message.tool_call_id is not None:
-                data["tool_call_id"] = message.tool_call_id
-
-            messages.append(data)
+        messages.extend(
+            self._message_to_dict(message)
+            for message in history
+        )
 
         return messages
 
@@ -193,3 +184,20 @@ class Agent:
                 messages=messages,
                 tools=self._tool_registry.schemas(),
             )
+
+    def _message_to_dict(
+        self,
+        message: Message,
+    ) -> dict:
+        data = {
+            "role": message.role,
+            "content": message.content,
+        }
+
+        if message.tool_calls is not None:
+            data["tool_calls"] = message.tool_calls
+
+        if message.tool_call_id is not None:
+            data["tool_call_id"] = message.tool_call_id
+
+        return data

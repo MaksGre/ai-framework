@@ -26,6 +26,9 @@ class OllamaClient(LLMClient):
             "messages": request.messages,
             "stream": False,
             "think": False,
+            "options": {
+                "num_predict": 512,
+            }
         }
         
         if request.tools:
