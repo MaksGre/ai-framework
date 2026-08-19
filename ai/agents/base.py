@@ -1,5 +1,5 @@
 from ai.llm.client import LLMClient
-from ai.llm.models import LLMRequest
+from ai.llm.models import LLMRequest, LLMResponse
 from ai.memory.base import Memory
 from ai.context.builder import ContextBuilder
 from ai.tools.base import Tool
@@ -116,10 +116,7 @@ class Agent:
         self,
         messages: list[dict],
     ) -> str:
-        request = LLMRequest(
-            messages=messages,
-            tools=self._tool_registry.schemas(),
-        )
+        request = self._build_request(messages)
 
         while True:
             response = self._llm.generate(request)
@@ -132,59 +129,73 @@ class Agent:
 
                 return response.text
 
-            assistant_tool_calls = []
+            self._handle_tool_calls(
+                response=response,
+                messages=messages,
+            )
 
-            for tool_call in response.tool_calls:
-                assistant_tool_calls.append(
-                    {
-                        "id": tool_call.id,
-                        "type": "function",
-                        "function": {
-                            "name": tool_call.name,
-                            "arguments": tool_call.arguments,
-                        },
-                    }
-                )
+            request = self._build_request(messages)
+        
+    def _handle_tool_calls(
+        self,
+        response: LLMResponse,
+        messages: list[dict],
+    ) -> None:
+        assistant_tool_calls = [
+            {
+                "id": tool_call.id,
+                "type": "function",
+                "function": {
+                    "name": tool_call.name,
+                    "arguments": tool_call.arguments,
+                },
+            }
+            for tool_call in response.tool_calls
+        ]
+
+        self._memory.add(
+            role="assistant",
+            content=response.text,
+            tool_calls=assistant_tool_calls,
+        )
+
+        messages.append(
+            {
+                "role": "assistant",
+                "content": response.text,
+                "tool_calls": assistant_tool_calls,
+            }
+        )
+
+        for tool_call in response.tool_calls:
+            result = self.execute_tool(
+                name=tool_call.name,
+                arguments=tool_call.arguments,
+            )
 
             self._memory.add(
-                role="assistant",
-                content=response.text,
-                tool_calls=assistant_tool_calls,
+                role="tool",
+                content=result,
+                tool_call_id=tool_call.id,
             )
 
             messages.append(
                 {
-                    "role": "assistant",
-                    "content": response.text,
-                    "tool_calls": assistant_tool_calls,
+                    "role": "tool",
+                    "content": result,
+                    "tool_call_id": tool_call.id,
                 }
             )
-
-            for tool_call in response.tool_calls:
-                result = self.execute_tool(
-                    name=tool_call.name,
-                    arguments=tool_call.arguments,
-                )
-
-                self._memory.add(
-                    role="tool",
-                    content=result,
-                    tool_call_id=tool_call.id,
-                )
-
-                messages.append(
-                    {
-                        "role": "tool",
-                        "content": result,
-                        "tool_call_id": tool_call.id,
-                    }
-                )
-
-            request = LLMRequest(
-                messages=messages,
-                tools=self._tool_registry.schemas(),
-            )
-
+            
+    def _build_request(
+        self,
+        messages: list[dict],
+    ) -> LLMRequest:
+        return LLMRequest(
+            messages=messages,
+            tools=self._tool_registry.schemas(),
+        )
+            
     def _message_to_dict(
         self,
         message: Message,
