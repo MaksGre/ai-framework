@@ -28,26 +28,6 @@ class ContextBuilder:
             file,
             task
         )
-        
-    def build_files(
-        self,
-        paths: list[str],
-        task: str
-    ) -> str:
-        if not paths:
-            raise ValueError("No files provided")
-
-        files = []
-        
-        for path in paths:
-            files.append(
-                self._load_file(path)
-            )
-
-        return self._prompt_builder.build_files_analysis_prompt(
-            files,
-            task
-        )
 
     def _load_file(self, name: str) -> FileContent:
         matches = self._finder.find(
