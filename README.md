@@ -1,5 +1,4 @@
 # AI Framework
-# AI Framework
 
 > Building a lightweight AI framework for specialized AI assistants.
 

@@ -14,8 +14,8 @@ class OllamaClient(LLMClient):
         self._model = model
 
         self._client = httpx.Client(
-            base_url=base_url,
-            timeout=60,
+            base_url = base_url,
+            timeout = 60,
         )
 
     def generate(self, request: LLMRequest) -> LLMResponse:
@@ -34,10 +34,9 @@ class OllamaClient(LLMClient):
         if request.tools:
             payload["tools"] = request.tools
         
-        response = httpx.post(
-            "http://localhost:11434/api/chat",
-            json=payload,
-            timeout=300,
+        response = self._client.post(
+            "/api/chat",
+            json=payload
         )
 
         elapsed = time.perf_counter() - start
