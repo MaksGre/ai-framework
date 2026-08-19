@@ -10,6 +10,7 @@ from ai.files.scanner import ProjectScanner
 from ai.files.finder import ProjectFinder
 from ai.memory.base import Memory
 from ai.tools.calculator import CalculatorTool
+from ai.tools.file import FileTool
 
 
 llm = OllamaClient(
@@ -36,13 +37,21 @@ memory = Memory()
 
 calculator = CalculatorTool()
 
+file_tool = FileTool(
+    loader = loader,
+    finder = finder,
+)
+
 mentor = Agent(
     name = "Engineering Mentor",
     system_prompt = ENGINEERING_MENTOR_PROMPT,
     llm = llm,
     builder = builder,
     memory = memory,
-    tools = [calculator],
+    tools = [
+        calculator,
+        file_tool
+    ],
 )
 
 def run_with_spinner(func):
@@ -87,7 +96,7 @@ while True:
         if not prompt.strip():
             continue
 
-        if prompt.lower() in ("exit", "quit"):
+        if prompt.lower() in ("exit", "выход"):
             break
 
         response = run_with_spinner(
