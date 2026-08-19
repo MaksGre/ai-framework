@@ -39,52 +39,6 @@ class Agent:
 
         return self._run_agent_loop(messages)
 
-    def analyze_file(
-        self,
-        path: str,
-        task: str,
-    ) -> str:
-        prompt = self._builder.build(
-            prompt = f"@{path}",
-            task = task,
-        )
-
-        request = LLMRequest(
-            messages = [
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
-        )
-
-        response = self._llm.generate(request)
-
-        return response.text
-
-    def analyze_files(
-        self,
-        paths: list[str],
-        task: str,
-    ) -> str:
-        prompt = self._builder.build_files(
-            paths=paths,
-            task=task,
-        )
-
-        request = LLMRequest(
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
-        )
-
-        response = self._llm.generate(request)
-
-        return response.text
-
     def execute_tool(
         self,
         name: str,
