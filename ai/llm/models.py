@@ -27,5 +27,7 @@ class LLMResponse:
     completion_tokens: int | None = None
 
     total_duration: int | None = None
+    
+    done_reason: str | None = None
 
     tool_calls: list[ToolCall] = field(default_factory=list)

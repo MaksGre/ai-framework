@@ -27,7 +27,7 @@ class OllamaClient(LLMClient):
             "stream": False,
             "think": False,
             "options": {
-                "num_predict": 512,
+                "num_predict": 2048,
             }
         }
         
@@ -52,6 +52,8 @@ class OllamaClient(LLMClient):
 
         print(f"Tokens: {prompt_tokens} prompt + {completion_tokens} completion = {prompt_tokens + completion_tokens} total")
         
+        print(f"Done reason: {data.get('done_reason')}")
+        
         return LLMResponse(
             text = data["message"].get("content", ""),
             total_duration = data.get("total_duration"),
@@ -59,6 +61,7 @@ class OllamaClient(LLMClient):
             model = data.get("model"),
             prompt_tokens = data.get("prompt_eval_count"),
             completion_tokens = data.get("eval_count"),
+            done_reason = data.get("done_reason"),
             tool_calls = [
                 ToolCall(
                     id = tool_call["id"],
