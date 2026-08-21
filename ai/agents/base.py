@@ -29,8 +29,8 @@ class Agent:
         context = self._builder.build(prompt)
 
         self._memory.add(
-            role="user",
-            content=context,
+            role = "user",
+            content = context,
         )
 
         messages = self._build_messages(
@@ -108,9 +108,9 @@ class Agent:
         ]
 
         self._memory.add(
-            role="assistant",
-            content=response.text,
-            tool_calls=assistant_tool_calls,
+            role = "assistant",
+            content = response.text,
+            tool_calls = assistant_tool_calls,
         )
 
         messages.append(
@@ -128,9 +128,9 @@ class Agent:
             )
 
             self._memory.add(
-                role="tool",
-                content=result,
-                tool_call_id=tool_call.id,
+                role = "tool",
+                content = result,
+                tool_call_id = tool_call.id,
             )
 
             messages.append(

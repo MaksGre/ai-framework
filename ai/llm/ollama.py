@@ -15,7 +15,7 @@ class OllamaClient(LLMClient):
 
         self._client = httpx.Client(
             base_url = base_url,
-            timeout = 60,
+            timeout = 120,
         )
 
     def generate(self, request: LLMRequest) -> LLMResponse:
@@ -27,7 +27,7 @@ class OllamaClient(LLMClient):
             "stream": False,
             "think": False,
             "options": {
-                "num_predict": 2048,
+                "num_predict": 3072,
             }
         }
         

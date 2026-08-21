@@ -13,20 +13,25 @@ class ContextBuilder:
         self._loader = loader
         self._prompt_builder = prompt_builder
         self._finder = finder
-
+        
     def build(
         self,
         prompt: str,
-        task: str = ""
     ) -> str:
+
         if not prompt.startswith("@"):
             return prompt
-            
-        file = self._load_file(prompt[1:])
-        
+
+        lines = prompt.splitlines()
+
+        file_name = lines[0][1:].strip()
+        task = "\n".join(lines[1:]).strip()
+
+        file = self._load_file(file_name)
+
         return self._prompt_builder.build_file_analysis_prompt(
             file,
-            task
+            task,
         )
 
     def _load_file(self, name: str) -> FileContent:

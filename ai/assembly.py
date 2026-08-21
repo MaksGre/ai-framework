@@ -35,18 +35,21 @@ def create_engineering_mentor() -> Agent:
     calculator = CalculatorTool()
 
     file_tool = FileTool(
-        loader=loader,
-        finder=finder,
+        loader = loader,
+        finder = finder,
     )
 
     return Agent(
-        name="Engineering Mentor",
-        system_prompt=ENGINEERING_MENTOR_PROMPT,
-        llm=llm,
-        builder=builder,
-        memory=memory,
-        tools=[
+        name = "Engineering Mentor",
+        system_prompt = ENGINEERING_MENTOR_PROMPT,
+        llm = llm,
+        builder = builder,
+        memory = memory,
+        tools = [
             calculator,
             file_tool,
         ],
     )
+
+def create_engineering_vacancy() -> Agent:
+    ...
