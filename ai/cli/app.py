@@ -1,12 +1,14 @@
 import threading
 import time
+
 from prompt_toolkit import PromptSession
 from prompt_toolkit.key_binding import KeyBindings
 
+
 class CLI:
 
-    def __init__(self, mentor):
-        self._mentor = mentor
+    def __init__(self, agents):
+        self._agents = agents
 
         bindings = KeyBindings()
 
@@ -21,6 +23,8 @@ class CLI:
         )
 
     def run(self) -> None:
+        agent = self._select_agent()
+
         while True:
             try:
                 prompt = self._session.prompt("> ")
@@ -32,7 +36,7 @@ class CLI:
                     break
 
                 response = run_with_spinner(
-                    lambda: self._mentor.ask(prompt)
+                    lambda: agent.ask(prompt)
                 )
 
                 print(response)
@@ -41,7 +45,30 @@ class CLI:
                 print("\nВыход.")
                 break
 
+    def _select_agent(self):
+        print("Выберите агента:")
+
+        agents = list(self._agents.items())
+
+        for index, (name, _) in enumerate(agents, start=1):
+            print(f"{index}. {name}")
+
+        while True:
+            choice = input("> ").strip()
+
+            if choice.isdigit():
+                index = int(choice) - 1
+
+                if 0 <= index < len(agents):
+                    name, agent = agents[index]
+                    print(f"\nВыбран агент: {name}\n")
+                    return agent
+
+            print("Введите номер агента.")
+
+
 def run_with_spinner(func):
+
     result = None
     error = None
     finished = threading.Event()
@@ -68,6 +95,7 @@ def run_with_spinner(func):
             end="",
             flush=True,
         )
+
         index += 1
         time.sleep(0.1)
 
