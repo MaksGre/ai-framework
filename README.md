@@ -24,7 +24,8 @@ Instead of relying on high-level frameworks, this project focuses on building th
 - Build specialized AI assistants
 - Design a clean and extensible AI architecture
 - Build reusable abstractions
-- Support multiple LLM providers
+- Support interchangeable LLM providers
+- Allow switching between local and cloud models
 - Understand how modern AI frameworks work internally
 
 ---
@@ -43,6 +44,7 @@ Instead of relying on high-level frameworks, this project focuses on building th
 - ✅ Prompt builder
 - ✅ File discovery and loading
 - ✅ CLI interface
+- ✅ Agent selection in CLI
 
 ### Agents
 
@@ -103,7 +105,7 @@ It can:
 - suggest a preparation plan;
 - generate a tailored cover letter when enough information is available.
 
-The assistant accepts the vacancy description directly as user input.
+The assistant can accept the vacancy description directly as user input.
 
 ---
 
@@ -116,6 +118,16 @@ The core architecture is built around several independent components:
                          │     CLI     │
                          └──────┬──────┘
                                 │
+                         select agent
+                                │
+              ┌─────────────────┴─────────────────┐
+              ▼                                   ▼
+       ┌───────────────┐                  ┌───────────────────┐
+       │ Engineering   │                  │ Engineering       │
+       │ Mentor        │                  │ Vacancy           │
+       └───────┬───────┘                  └─────────┬─────────┘
+               │                                    │
+               └────────────────┬───────────────────┘
                                 ▼
                          ┌─────────────┐
                          │    Agent    │
@@ -191,6 +203,8 @@ Stores conversation messages and tool calls.
 
 The current implementation provides bounded in-memory conversation history.
 
+Memory is independent from the LLM, allowing the same memory abstraction to be used with different models.
+
 ### Tools
 
 Tools extend agent capabilities beyond text generation.
@@ -213,6 +227,71 @@ For example, the `@file` syntax allows a project file to be loaded and transform
 The LLM is treated as an interchangeable component.
 
 The current implementation uses Ollama with Qwen3.
+
+The agent does not depend on a specific model implementation.
+
+---
+
+## 🔄 Local and Cloud LLMs
+
+One of the architectural goals of the project is to keep agents independent from a specific language model.
+
+For example, an agent should be able to use:
+
+```text
+                    ┌─────────────┐
+                    │    Agent    │
+                    └──────┬──────┘
+                           │
+                           ▼
+                      LLMClient
+                           │
+                ┌──────────┴──────────┐
+                ▼                     ▼
+        ┌─────────────┐       ┌─────────────┐
+        │ Local LLM   │       │ Cloud LLM   │
+        │ Ollama/Qwen │       │   Provider  │
+        └─────────────┘       └─────────────┘
+```
+
+This makes it possible to use a local model when an internet connection is unavailable and switch to a cloud model when network access is available.
+
+The MVP currently implements the Ollama backend.
+
+Additional providers and runtime switching are future work.
+
+---
+
+## 🖥 CLI
+
+The CLI provides a simple interface for interacting with different agents.
+
+At startup the user selects an agent:
+
+```text
+Выберите агента:
+1. Engineering Mentor
+2. Engineering Vacancy
+> 1
+
+Выбран агент: Engineering Mentor
+```
+
+After selecting an agent, the user can interact with it normally.
+
+Use:
+
+```text
+exit
+```
+
+or:
+
+```text
+выход
+```
+
+to quit.
 
 ---
 
@@ -238,21 +317,7 @@ Then run:
 uv run python main.py
 ```
 
-The application starts an interactive CLI.
-
-Use:
-
-```text
-exit
-```
-
-or:
-
-```text
-выход
-```
-
-to quit.
+Select an agent from the CLI menu and start interacting with it.
 
 ---
 
@@ -282,6 +347,7 @@ to quit.
 - [x] Vacancy analysis prompt
 - [x] Requirement / gap analysis
 - [x] Cover letter support
+- [x] Agent selection in CLI
 
 ### Phase 4 — Future Framework Capabilities
 
@@ -290,9 +356,15 @@ to quit.
 - [ ] RAG
 - [ ] Streaming
 - [ ] Async execution
+- [ ] Persistent memory
+- [ ] Improved context management
+- [ ] More robust tool error handling
+- [ ] Configurable agent loop limits
+- [ ] Additional LLM providers
+- [ ] Runtime LLM provider selection
+- [ ] Local/cloud model fallback
 - [ ] Multi-agent workflows
 - [ ] Observability
-- [ ] Additional LLM providers
 
 ### Phase 5 — Specialized Assistants
 
@@ -314,12 +386,16 @@ The following ideas are intentionally outside the current MVP and are kept as fu
 - better tool error handling;
 - configurable LLM parameters;
 - support for additional LLM providers;
+- runtime switching between LLM providers;
+- local/cloud LLM fallback;
 - asynchronous tool execution;
 - streaming responses;
 - structured outputs;
 - multi-agent workflows;
 - observability and tracing;
 - more sophisticated vacancy / candidate profile handling.
+
+These items are intentionally not part of the current MVP.
 
 The goal is to keep the MVP small while preserving a clear path for further development.
 
@@ -332,6 +408,7 @@ The goal is to keep the MVP small while preserving a clear path for further deve
 - Memory is independent from the LLM.
 - Tools are reusable.
 - Dependencies are explicitly provided to agents.
+- Agents should not depend on a specific LLM provider.
 - Everything should work offline whenever possible.
 
 ---
@@ -353,6 +430,28 @@ An agent combines:
 
 This architecture allows the same agent abstraction to work with different language models without coupling agent behavior to a specific model implementation.
 
+The long-term goal is to be able to run the same specialized assistant using either a local model or a cloud model depending on the environment and requirements.
+
+---
+
+## 🤖 Planned Assistants
+
+### 👨‍🏫 Engineering Mentor
+
+Personal software engineering mentor.
+
+### 💼 Engineering Vacancy
+
+Career and vacancy analysis assistant.
+
+### 🚀 EVE Online Assistant
+
+Game knowledge and market analysis.
+
+### 🏭 Industrial Automation Assistant
+
+Industrial automation knowledge assistant.
+
 ---
 
 ## 📖 Philosophy
@@ -360,3 +459,21 @@ This architecture allows the same agent abstraction to work with different langu
 This project is built as an educational engineering project.
 
 The objective is not to create yet another AI framework, but to understand how modern LLM-powered systems work by implementing them from first principles and applying them to real-world assistants.
+
+The project intentionally avoids premature complexity.
+
+The MVP focuses on understanding and implementing the fundamental building blocks:
+
+```text
+LLM
+ │
+ ▼
+Agent
+ │
+ ├── Memory
+ ├── Tools
+ ├── Context
+ └── Prompt
+```
+
+More advanced capabilities are added only when they solve a real problem in the project.
